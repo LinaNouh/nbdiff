@@ -1,6 +1,5 @@
-Comparison of Existing Diff/Merge Tools
+﻿Comparison of Existing Diff/Merge Tools
 =======================================
-
 
 SwiftCompare
 ------------
