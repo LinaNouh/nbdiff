@@ -8,7 +8,8 @@ def diff(before, after):
     grid = create_grid(before, after)
     nrows = len(grid[0])
     ncols = len(grid)
-    dps = diff_points(grid)
+    dps = diff_points(before,after)
+    #dps = diff_points(grid)
     result = []
     for kind, col, row in dps:
         if kind == 'unchanged':
@@ -32,8 +33,10 @@ def diff(before, after):
     return result
 
 
-def diff_points(grid):
+#def diff_points(grid):
+def diff_points(before, after):
     # cols = before; rows = after
+    grid = create_grid(before, after)
     ncols = len(grid)
     nrows = len(grid[0])
 
@@ -60,17 +63,54 @@ def diff_points(grid):
             cur_col += 1
             cur_row += 1
         elif goodcol and (not matched_cols or cur_col != matched_cols[0]):
+            modified = False
             assert cur_col < ncols
-            result.append(('deleted', cur_col, None))
+            for i in range(len(after)):
+                if check_modified(before[cur_col], after[i]):
+                    modified = True
+                    result.append(('modified', cur_col, i))
+                    break
+            if modified == False:
+                result.append(('deleted', cur_col, None))
             cur_col += 1
         elif goodrow and (not matched_rows or cur_row != matched_rows[0]):
+            modified = False
             assert cur_row < nrows
-            result.append(('added', None, cur_row))
+            for j in range(len(before)):
+                if check_modified(after[cur_row], before[j]):
+                    modified = True
+                    result.append(('modified', j, cur_row))
+                    break
+            if modified == False:
+                result.append(('added', None, cur_row))
             cur_row += 1
 #        print result
 
     return result
 
+def count_similar_lines(cellA, cellB):
+    grid = create_grid(cellA, cellB)
+    matches = []
+    for colnum in range(len(grid)):
+        new_matches = find_matches(grid[colnum],colnum)
+        matches = matches + new_matches
+
+    matched_cols = [r[0] for r in matches]
+    matched_rows = [r[1] for r in matches]
+
+    unique_cols = []
+    [unique_cols.append(col) for col in matched_cols if col not in unique_cols]
+    unique_rows = []
+    [unique_rows.append(row) for row in matched_rows if row not in unique_rows]
+
+    return min(len(unique_cols), len(unique_rows))
+
+def check_modified(cellA, cellB):
+    unchanged_count = count_similar_lines(cellA, cellB)
+    similarity_percent = (2.0 * unchanged_count) / (len(cellA) + len(cellB))
+    if similarity_percent >= 0.50:
+        return True
+    return False
 
 def create_grid(before, after):
     ncols = len(before)
@@ -78,14 +118,12 @@ def create_grid(before, after):
     all_comps = [b == a for b, a in it.product(before, after)]
     return [all_comps[col*(nrows):col*(nrows)+nrows] for col in range(ncols)]
 
-
 def find_matches(col, colNum):
     result = []
     for j in range(len(col)):
         if col[j]:
             result.append((colNum, j))
     return result
-
 
 def lcs(grid):
     kcs = find_candidates(grid)

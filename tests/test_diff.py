@@ -10,6 +10,7 @@ from nbdiff.diff import (
     diff_points,
     create_grid,
     diff,
+    check_modified,
 )
 
 
@@ -54,8 +55,18 @@ def test_create_grid():
     grid = create_grid(A, B)
     assert len([True for col in grid if len(col) == 0]) == 0
 
+def test_check_modified():
+    A = "mnjgjc\nabcabba\nbbbc\nabcabba\nbbbbb"
+    B = "cbabac\nabcabba\nabcabba\nabcabba\nbbbbb"
+
+    result = check_modified(A, B)
+    expected = True
+    eq_(result, expected)
 
 def test_diff_points():
+    A = "abcabba", ""
+    B = "cbabac"
+
     grid = [
         [False, False, True, False, True, False],
         [False, True, False, True, False, False],
@@ -65,7 +76,7 @@ def test_diff_points():
         [False, True, False, True, False, False],
         [False, False, True, False, True, False]
     ]
-    result = diff_points(grid)
+    result = diff_points(A, B)
 
     expected = [
         ('deleted', 0, None),
