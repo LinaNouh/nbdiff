@@ -14,9 +14,17 @@ def diff(before, after):
     for kind, col, row in dps:
         if kind == 'unchanged':
             value = before[col]
+            result.append({
+                'state': kind,
+                'value': value,
+            })
         elif kind == 'deleted':
             assert col < ncols
             value = before[col]
+            result.append({
+                'state': kind,
+                'value': value,
+            })
         elif kind == 'added':
 #            print
 #            print dps
@@ -26,10 +34,23 @@ def diff(before, after):
             #if len(after) <= row:
             #    print grid
             value = after[row]
-        result.append({
-            'state': kind,
-            'value': value,
-        })
+            result.append({
+                'state': kind,
+                'value': value,
+            })
+        elif kind == 'modified':
+            assert col < ncols
+            value = before[col]
+            result.append({
+                'state': kind,
+                'value': value,
+            })
+            assert row < nrows
+            value = after[row]
+            result.append({
+                'state': kind,
+                'value': value,
+            })
     return result
 
 
@@ -66,6 +87,8 @@ def diff_points(before, after):
             modified = False
             assert cur_col < ncols
             for i in range(len(after)):
+                print before
+                print after
                 if check_modified(before[cur_col], after[i]):
                     modified = True
                     result.append(('modified', cur_col, i))
@@ -89,7 +112,8 @@ def diff_points(before, after):
     return result
 
 def count_similar_lines(cellA, cellB):
-    grid = create_grid(cellA, cellB)
+    grid = create_grid(cellA['input'], cellB['input'])
+    #grid = create_grid(cellA, cellB)
     matches = []
     for colnum in range(len(grid)):
         new_matches = find_matches(grid[colnum],colnum)
@@ -126,22 +150,24 @@ def find_matches(col, colNum):
     return result
 
 def lcs(grid):
+    acc = []
     kcs = find_candidates(grid)
-    highest = max(kcs.keys())
-    last_point = kcs[highest][-1]
-    cur = highest - 1
-    acc = [last_point]
-    while cur > 0:
-        comp = acc[-1]
-        cx, cy = comp
-        possibilities = [
-            (x, y) for (x, y)
-            in reversed(kcs[cur])
-            if cx > x and cy > y
-        ]
-        if len(possibilities) > 0:
-            acc.append(possibilities[-1])
-        cur -= 1
+    if kcs:
+        highest = max(kcs.keys())
+        last_point = kcs[highest][-1]
+        cur = highest - 1
+        acc = [last_point]
+        while cur > 0:
+            comp = acc[-1]
+            cx, cy = comp
+            possibilities = [
+                (x, y) for (x, y)
+                in reversed(kcs[cur])
+                if cx > x and cy > y
+            ]
+            if len(possibilities) > 0:
+                acc.append(possibilities[-1])
+            cur -= 1
 
     return list(reversed(acc))
 
