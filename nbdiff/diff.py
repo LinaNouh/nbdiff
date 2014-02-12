@@ -2,7 +2,7 @@ import itertools as it
 import collections
 
 
-def diff(before, after):
+def diff(before, after, check_modified=False):
     grid = create_grid(before, after)
     nrows = len(grid[0])
     ncols = len(grid)
