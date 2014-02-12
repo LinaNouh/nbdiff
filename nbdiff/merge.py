@@ -3,6 +3,15 @@ from .comparable import CellComparator
 import itertools as it
 import copy
 
+#def line_based_notebook_merge(local, base, remote):
+ #   cells = notebook_merge(local, base, remote)
+  #  line_based_output = {
+   #     'worksheet': [{'cells': cells, 'metadata': {'line-diffs': {}}}]
+    #}
+
+    #for i in range(len(cells)/3):
+     #   line_based_output['worksheet']['metadata']['line-diffs'][i].append()
+
 
 def notebook_merge(local, base, remote):
     '''Accept three parsed notebooks and create a new notebook
